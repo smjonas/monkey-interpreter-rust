@@ -44,7 +44,7 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         self.skip_whitespace();
         if self.ch == '\0' {
-            let token = make_token(EOF, "");
+            let token = Token::EOF;
             self.read_char();
             return token;
         }
@@ -52,31 +52,31 @@ impl Lexer {
             '=' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    make_token(EQ, "==")
+                    Token::Eq
                 } else {
-                    make_token_ch(ASSIGN, self.ch)
+                    Token::Assign
                 }
             }
-            '+' => make_token_ch(PLUS, self.ch),
-            '-' => make_token_ch(MINUS, self.ch),
+            '+' => Token::Plus,
+            '-' => Token::Minus,
             '!' => {
                 if self.peek_char() == '=' {
                     self.read_char();
-                    make_token(NOT_EQ, "!=")
+                    Token::NotEq
                 } else {
-                    make_token_ch(BANG, self.ch)
+                    Token::Bang
                 }
             }
-            '/' => make_token_ch(SLASH, self.ch),
-            '*' => make_token_ch(ASTERISK, self.ch),
-            '<' => make_token_ch(LT, self.ch),
-            '>' => make_token_ch(GT, self.ch),
-            ';' => make_token_ch(SEMICOLON, self.ch),
-            ',' => make_token_ch(COMMA, self.ch),
-            '(' => make_token_ch(LPAREN, self.ch),
-            ')' => make_token_ch(RPAREN, self.ch),
-            '{' => make_token_ch(LBRACE, self.ch),
-            '}' => make_token_ch(RBRACE, self.ch),
+            '/' => Token::Slash,
+            '*' => Token::Asterisk,
+            '<' => Token::Lt,
+            '>' => Token::Gt,
+            ';' => Token::Semicolon,
+            ',' => Token::Comma,
+            '(' => Token::LParen,
+            ')' => Token::RParen,
+            '{' => Token::LBrace,
+            '}' => Token::RBrace,
             _ => {
                 if is_letter(self.ch) {
                     let literal = self.read_identifier();
@@ -84,9 +84,9 @@ impl Lexer {
                     return make_token(type_, literal);
                 } else if self.ch.is_digit(10) {
                     let literal = self.read_number();
-                    return make_token(INT, literal);
+                    return Token::Int(literal.parse().unwrap());
                 } else {
-                    return make_token_ch(ILLEGAL, self.ch);
+                    return Token::Illegal;
                 }
             }
         };
@@ -149,92 +149,87 @@ if (5 < 10) {
 
         let mut l = Lexer::new(input);
         let tests = vec![
-            make_token(LET, "let"),
-            make_token(IDENT, "five"),
-            make_token(ASSIGN, "="),
-            make_token(INT, "5"),
-            make_token(SEMICOLON, ";"),
-            make_token(LET, "let"),
-            make_token(IDENT, "ten"),
-            make_token(ASSIGN, "="),
-            make_token(INT, "10"),
-            make_token(SEMICOLON, ";"),
-            make_token(LET, "let"),
-            make_token(IDENT, "add"),
-            make_token(ASSIGN, "="),
-            make_token(FUNCTION, "fn"),
-            make_token(LPAREN, "("),
-            make_token(IDENT, "x"),
-            make_token(COMMA, ","),
-            make_token(IDENT, "y"),
-            make_token(RPAREN, ")"),
-            make_token(LBRACE, "{"),
-            make_token(IDENT, "x"),
-            make_token(PLUS, "+"),
-            make_token(IDENT, "y"),
-            make_token(SEMICOLON, ";"),
-            make_token(RBRACE, "}"),
-            make_token(SEMICOLON, ";"),
-            make_token(LET, "let"),
-            make_token(IDENT, "result"),
-            make_token(ASSIGN, "="),
-            make_token(IDENT, "add"),
-            make_token(LPAREN, "("),
-            make_token(IDENT, "five"),
-            make_token(COMMA, ","),
-            make_token(IDENT, "ten"),
-            make_token(RPAREN, ")"),
-            make_token(SEMICOLON, ";"),
-            make_token(BANG, "!"),
-            make_token(MINUS, "-"),
-            make_token(SLASH, "/"),
-            make_token(ASTERISK, "*"),
-            make_token(INT, "5"),
-            make_token(SEMICOLON, ";"),
-            make_token(INT, "5"),
-            make_token(LT, "<"),
-            make_token(INT, "10"),
-            make_token(GT, ">"),
-            make_token(INT, "5"),
-            make_token(SEMICOLON, ";"),
-            make_token(IF, "if"),
-            make_token(LPAREN, "("),
-            make_token(INT, "5"),
-            make_token(LT, "<"),
-            make_token(INT, "10"),
-            make_token(RPAREN, ")"),
-            make_token(LBRACE, "{"),
-            make_token(RETURN, "return"),
-            make_token(TRUE, "true"),
-            make_token(SEMICOLON, ";"),
-            make_token(RBRACE, "}"),
-            make_token(ELSE, "else"),
-            make_token(LBRACE, "{"),
-            make_token(RETURN, "return"),
-            make_token(FALSE, "false"),
-            make_token(SEMICOLON, ";"),
-            make_token(RBRACE, "}"),
-            make_token(INT, "10"),
-            make_token(EQ, "=="),
-            make_token(INT, "10"),
-            make_token(SEMICOLON, ";"),
-            make_token(INT, "10"),
-            make_token(NOT_EQ, "!="),
-            make_token(INT, "9"),
-            make_token(SEMICOLON, ";"),
-            make_token(EOF, ""),
+            Token::Let,
+            Token::Ident(String::from("five")),
+            Token::Assign,
+            Token::Int(String::from("5")),
+            Token::Semicolon,
+            Token::Let,
+            Token::Ident(String::from("ten")),
+            Token::Assign,
+            Token::Int(String::from("10")),
+            Token::Semicolon,
+            Token::Let,
+            Token::Ident(String::from("add")),
+            Token::Assign,
+            Token::Function,
+            Token::LParen,
+            Token::Ident(String::from("x")),
+            Token::Comma,
+            Token::Ident(String::from("y")),
+            Token::RParen,
+            Token::LBrace,
+            Token::Ident(String::from("x")),
+            Token::Plus,
+            Token::Ident(String::from("y")),
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Semicolon,
+            Token::Let,
+            Token::Ident(String::from("result")),
+            Token::Assign,
+            Token::Ident(String::from("add")),
+            Token::LParen,
+            Token::Ident(String::from("five")),
+            Token::Comma,
+            Token::Ident(String::from("ten")),
+            Token::RParen,
+            Token::Semicolon,
+            Token::Bang,
+            Token::Minus,
+            Token::Slash,
+            Token::Asterisk,
+            Token::Int(String::from("5")),
+            Token::Semicolon,
+            Token::Int(String::from("5")),
+            Token::Lt,
+            Token::Int(String::from("10")),
+            Token::Gt,
+            Token::Int(String::from("5")),
+            Token::Semicolon,
+            Token::If,
+            Token::LParen,
+            Token::Int(String::from("5")),
+            Token::Lt,
+            Token::Int(String::from("10")),
+            Token::RParen,
+            Token::LBrace,
+            Token::Return,
+            Token::True,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Else,
+            Token::LBrace,
+            Token::Return,
+            Token::False,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Int(String::from("10")),
+            Token::Eq,
+            Token::Int(String::from("10")),
+            Token::Semicolon,
+            Token::Int(String::from("10")),
+            Token::NotEq,
+            Token::Int(String::from("9")),
+            Token::Semicolon,
+            Token::EOF,
         ];
-        for test in tests {
-            let token = l.next_token();
+        for expected_token_type in tests {
+            let actual_token_type = l.next_token();
             assert_eq!(
-                test.token_type, token.token_type,
+                expected_token_type, actual_token_type
                 "Wrong token_type. Expected: {}, got: {}",
-                test.token_type, token.token_type
-            );
-            assert_eq!(
-                test.literal, token.literal,
-                "Wrong literal. Expected: {}, got: {}",
-                test.literal, token.literal
+                expected_token_type, actual_token_type
             );
         }
     }
