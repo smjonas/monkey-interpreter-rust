@@ -1,6 +1,9 @@
-pub mod lexer;
-pub mod token;
+mod lexer;
+mod repl;
+mod token;
 
 fn main() {
-    println!("Hello, world!");
+    println!("Hello! This is the Monkey programming language!\n");
+    println!("Feel free to type in commands\n");
+    repl::start();
 }

@@ -50,6 +50,7 @@ pub static KEYWORDS: phf::Map<&'static str, &'static str> = phf_map! {
 
 type TokenType = String;
 
+#[derive(Debug)]
 pub struct Token {
     pub token_type: String,
     pub literal: TokenType,
