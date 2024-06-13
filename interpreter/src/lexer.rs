@@ -33,20 +33,48 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    fn peek_char(&self) -> char {
+        if self.read_position >= self.input.len() {
+            return 0 as char;
+        } else {
+            return self.input.chars().nth(self.read_position).unwrap();
+        }
+    }
+
     fn next_token(&mut self) -> Token {
         self.skip_whitespace();
         if self.ch == '\0' {
-            let token = make_token_ch(EOF, self.ch);
+            let token = make_token(EOF, "");
             self.read_char();
             return token;
         }
         let token = match self.ch {
-            '=' => make_token_ch(ASSIGN, self.ch),
+            '=' => {
+                if self.peek_char() == '=' {
+                    self.read_char();
+                    make_token(EQ, "==")
+                } else {
+                    make_token_ch(ASSIGN, self.ch)
+                }
+            }
+            '+' => make_token_ch(PLUS, self.ch),
+            '-' => make_token_ch(MINUS, self.ch),
+            '!' => {
+                if self.peek_char() == '=' {
+                    self.read_char();
+                    make_token(NOT_EQ, "!=")
+                } else {
+                    make_token_ch(BANG, self.ch)
+                }
+            }
+            '/' => make_token_ch(SLASH, self.ch),
+            '*' => make_token_ch(ASTERISK, self.ch),
+            '<' => make_token_ch(LT, self.ch),
+            '>' => make_token_ch(GT, self.ch),
             ';' => make_token_ch(SEMICOLON, self.ch),
+            ',' => make_token_ch(COMMA, self.ch),
             '(' => make_token_ch(LPAREN, self.ch),
             ')' => make_token_ch(RPAREN, self.ch),
-            ',' => make_token_ch(COMMA, self.ch),
-            '+' => make_token_ch(PLUS, self.ch),
             '{' => make_token_ch(LBRACE, self.ch),
             '}' => make_token_ch(RBRACE, self.ch),
             _ => {
@@ -115,8 +143,9 @@ if (5 < 10) {
 }
 
 10 == 10;
-10 != 9;"
-            .to_string();
+10 != 9;
+"
+        .to_string();
 
         let mut l = Lexer::new(input);
         let tests = vec![
